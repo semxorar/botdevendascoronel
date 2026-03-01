@@ -2,7 +2,7 @@ const axios = require('axios');
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
-const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+const ACCESS_TOKEN = process.env.ML_ACCESS_TOKEN;
 const NICHOS = ['iphone', 'geladeira', 'ps5', 'monitor gamer'];
 
 async function buscar() {
