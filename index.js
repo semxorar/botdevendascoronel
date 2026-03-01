@@ -4,10 +4,10 @@ const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 const ACCESS_TOKEN = process.env.ML_ACCESS_TOKEN;
 
-const NICHOS = ['iphone', 'ps5', 'monitor gamer'];
+const NICHOS = ['iphone', 'ps5', 'monitor gamer', 'geladeira'];
 
 async function buscar() {
-    console.log("🚀 Iniciando busca de teste...");
+    console.log("🚀 Iniciando busca para o canal Coronel Ofertas...");
 
     for (const nicho of NICHOS) {
         try {
@@ -17,17 +17,12 @@ async function buscar() {
             });
 
             const itens = res.data.results || [];
-            
-            // LOG DE TESTE: Mostra no GitHub quantos itens foram achados
-            console.log(`🔎 Nicho ${nicho}: ${itens.length} itens encontrados.`);
+            // Filtro: busca o primeiro item que tenha um desconto (preço original > preço atual)
+            const item = itens.find(i => i.original_price > i.price) || itens[0];
 
-            if (itens.length > 0) {
-                // Pegamos o primeiro item da lista (mesmo sem desconto) apenas para TESTAR o envio
-                const item = itens[0]; 
-                
+            if (item) {
                 const preco = item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 
-                // Formatação igual à da imagem que você enviou
                 const msg = `🔥 *${item.title}*\n` +
                             `💰 *${preco}*\n\n` +
                             `- 12x sem juros\n` +
@@ -43,11 +38,12 @@ async function buscar() {
                     parse_mode: 'Markdown'
                 });
                 
-                console.log(`✅ Mensagem de teste enviada para: ${item.title}`);
-                return; // Para o teste após o primeiro envio bem-sucedido
+                console.log(`✅ Sucesso! Oferta de ${nicho} enviada.`);
+                // Espera 5 segundos para não ser bloqueado pelo Telegram
+                await new Promise(r => setTimeout(r, 5000));
             }
         } catch (e) {
-            console.error(`❌ Erro no nicho ${nicho}:`, e.response?.data || e.message);
+            console.error(`❌ Erro no nicho ${nicho}:`, e.message);
         }
     }
 }
