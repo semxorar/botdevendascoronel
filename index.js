@@ -1,16 +1,22 @@
 const axios = require('axios');
+const qs = require('querystring'); // Necessário para formatar os dados corretamente
 
 async function iniciarBot() {
-    console.log("🏁 Iniciando Processo com Renovação de Token...");
+    console.log("🏁 Iniciando Processo de Autenticação...");
     
     try {
-        // 1. RENOVAR O TOKEN (Para evitar o erro 403)
-        console.log("🔄 Solicitando novo Access Token ao Mercado Livre...");
-        const authRes = await axios.post('https://api.mercadolibre.com/oauth/token', {
+        // 1. RENOVAR O TOKEN (Usando o formato de formulário aceito pelo ML)
+        console.log("🔄 Solicitando novo Access Token...");
+        
+        const dadosRenovacao = qs.stringify({
             grant_type: 'refresh_token',
             client_id: process.env.ML_CLIENT_ID,
             client_secret: process.env.ML_CLIENT_SECRET,
             refresh_token: process.env.ML_REFRESH_TOKEN
+        });
+
+        const authRes = await axios.post('https://api.mercadolibre.com/oauth/token', dadosRenovacao, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
 
         const novoToken = authRes.data.access_token;
@@ -46,6 +52,10 @@ async function iniciarBot() {
         if (error.response) {
             console.error("Status:", error.response.status);
             console.error("Resposta:", JSON.stringify(error.response.data));
+            
+            if (error.response.data.message.includes("invalid_grant")) {
+                console.error("👉 DICA: Seu ML_REFRESH_TOKEN expirou de vez. Gere um novo no painel do ML e atualize o GitHub Secret.");
+            }
         } else {
             console.error("Mensagem:", error.message);
         }
