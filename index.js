@@ -1,17 +1,13 @@
 const axios = require('axios');
 
-// --- CARREGAR VARIÁVEIS DO GITHUB ---
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 const ACCESS_TOKEN = process.env.ML_ACCESS_TOKEN;
-const CLIENT_ID = process.env.ML_CLIENT_ID;
-const CLIENT_SECRET = process.env.ML_CLIENT_SECRET;
-const REFRESH_TOKEN = process.env.ML_REFRESH_TOKEN;
 
-const NICHOS = ['iphone', 'geladeira', 'ps5', 'monitor gamer'];
+const NICHOS = ['iphone', 'ps5', 'monitor gamer'];
 
-async function buscarOfertas() {
-    console.log("🔎 Iniciando busca profissional...");
+async function buscar() {
+    console.log("🚀 Iniciando busca de teste...");
 
     for (const nicho of NICHOS) {
         try {
@@ -21,36 +17,39 @@ async function buscarOfertas() {
             });
 
             const itens = res.data.results || [];
-            // Filtra itens com desconto real
-            const item = itens.find(i => i.original_price > i.price);
+            
+            // LOG DE TESTE: Mostra no GitHub quantos itens foram achados
+            console.log(`🔎 Nicho ${nicho}: ${itens.length} itens encontrados.`);
 
-            if (item) {
-                // Formatação Profissional (Estilo Wolf Ofertas)
-                const precoFormatado = item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                const mensagem = 
-                    `🔥 *${item.title}*\n` +
-                    `💰 *${precoFormatado}*\n\n` +
-                    `- 12x sem juros\n` +
-                    `- Frete rápido\n\n` +
-                    `🛒 *Link de compra:* ${item.permalink}`;
+            if (itens.length > 0) {
+                // Pegamos o primeiro item da lista (mesmo sem desconto) apenas para TESTAR o envio
+                const item = itens[0]; 
+                
+                const preco = item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                
+                // Formatação igual à da imagem que você enviou
+                const msg = `🔥 *${item.title}*\n` +
+                            `💰 *${preco}*\n\n` +
+                            `- 12x sem juros\n` +
+                            `- Frete rápido\n\n` +
+                            `🛒 *Link de compra:* ${item.permalink}`;
 
-                // Envia Foto em Alta Resolução
-                const fotoUrl = item.thumbnail.replace("-I.jpg", "-O.jpg");
+                const foto = item.thumbnail.replace("-I.jpg", "-O.jpg");
 
                 await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
                     chat_id: CHAT_ID,
-                    photo: fotoUrl,
-                    caption: mensagem,
+                    photo: foto,
+                    caption: msg,
                     parse_mode: 'Markdown'
                 });
-
-                console.log(`✅ Postado: ${item.title}`);
-                await new Promise(r => setTimeout(r, 5000)); // Espera 5s
+                
+                console.log(`✅ Mensagem de teste enviada para: ${item.title}`);
+                return; // Para o teste após o primeiro envio bem-sucedido
             }
-        } catch (err) {
-            console.error(`❌ Erro em ${nicho}: Verifique se o ML_ACCESS_TOKEN ainda é válido.`);
+        } catch (e) {
+            console.error(`❌ Erro no nicho ${nicho}:`, e.response?.data || e.message);
         }
     }
 }
 
-buscarOfertas();
+buscar();
