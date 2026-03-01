@@ -1,21 +1,9 @@
-name: Enviar Ofertas Coronel
-on:
-  schedule:
-    - cron: '*/30 * * * *' # Roda a cada 30 min
-  workflow_dispatch: # Permite rodar na mão para testar
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-node: '20'
-      - run: npm install axios
-      - name: Rodar Bot
+- name: Rodar Bot
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          ML_TOKEN: ${{ secrets.ML_TOKEN }}
+          ML_ACCESS_TOKEN: ${{ secrets.ML_ACCESS_TOKEN }}
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
+          ML_REFRESH_TOKEN: ${{ secrets.ML_REFRESH_TOKEN }}
         run: node index.js
